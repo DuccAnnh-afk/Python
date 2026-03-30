@@ -3,25 +3,32 @@ from github_push import push_github
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
+# ===== Lấy danh sách chương =====
 def list_chuong():
     return [
         d for d in os.listdir(ROOT)
-        if os.path.isdir(os.path.join(ROOT, d)) 
-        and "chuong" in d.lower()
+        if os.path.isdir(os.path.join(ROOT, d)) and "chuong" in d.lower()
     ]
-def list_bai(chuong):
+
+# ===== Lấy danh sách luyện tập =====
+def list_luyentap(chuong):
     path = os.path.join(ROOT, chuong)
-    result = []
+    return [
+        d for d in os.listdir(path)
+        if os.path.isdir(os.path.join(path, d))
+    ]
 
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            if f.endswith(".py"):
-                full_path = os.path.join(root, f)
-                result.append(full_path)
+# ===== Lấy danh sách bài =====
+def list_bai(chuong, luyentap):
+    path = os.path.join(ROOT, chuong, luyentap)
+    return [
+        f for f in os.listdir(path)
+        if f.endswith(".py")
+    ]
 
-    return result
-
+# ===== MAIN =====
 def main():
+    # --- Chọn chương ---
     chuongs = list_chuong()
 
     print("Danh sách chương:")
@@ -31,28 +38,32 @@ def main():
     choice = int(input("Chọn chương: ")) - 1
     chuong = chuongs[choice]
 
-    path = os.path.join(ROOT, chuong)
+    # --- Chọn luyện tập ---
+    luyentaps = list_luyentap(chuong)
 
     print(f"\n--- {chuong} ---")
+    for i, lt in enumerate(luyentaps, 1):
+        print(f"{i}. {lt}")
 
-    bais = list_bai(chuong)
+    choice_lt = int(input("Chọn luyện tập: ")) - 1
+    luyentap = luyentaps[choice_lt]
 
-    if not bais:
-        print("Chưa có bài nào trong chương này!")
-        return
+    # --- Chọn bài ---
+    bais = list_bai(chuong, luyentap)
 
+    print(f"\n--- {chuong}/{luyentap} ---")
     for i, bai in enumerate(bais, 1):
         print(f"{i}. {bai}")
 
     select = input("Chọn bài (số hoặc 'all'): ")
 
-    # Không cần copy nữa, chỉ cần push
     if select.lower() == "all":
-        print("Push toàn bộ bài trong chương...")
+        print("Push toàn bộ bài...")
     else:
         bai = bais[int(select) - 1]
         print(f"Push {bai}...")
 
+    # --- Push Git ---
     push_github()
 
 if __name__ == "__main__":
