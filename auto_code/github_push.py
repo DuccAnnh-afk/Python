@@ -20,7 +20,7 @@ def push_github():
 
         run("git stash pop")
 
-     
+
         run("git add .")
 
         commit_status = run('git commit -m "auto add bai tap"')
